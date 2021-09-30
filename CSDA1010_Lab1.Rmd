@@ -1,0 +1,507 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Lab 1 - Filipe Soares
+
+### Set Working Directory
+```{r, echo=TRUE}
+
+setwd('C:/Users/filip/Desktop/Back To School/Data1010/Lab1/Lab1')
+
+```
+### Import CSV Files
+
+```{r, echo=TRUE}
+Boeing = read.csv('BoeingStock.csv')
+
+CocaCola = read.csv('CocaColaStock.csv')
+
+ProcterGamble = read.csv('ProcterGambleStock.csv')
+
+GE = read.csv('GEStock.csv')
+
+IBM = read.csv('IBMStock.csv')
+```
+
+# Question: Identify the data type for the DATE variable
+```{r, echo=TRUE}
+str(IBM)
+```
+## Answer: Date is a character data type
+
+### Convert to proper dates
+```{r, echo=TRUE}
+GE$Date = as.Date(GE$Date, "%m/%d/%y")
+IBM$Date = as.Date(IBM$Date, "%m/%d/%y")
+ProcterGamble$Date = as.Date(ProcterGamble$Date, "%m/%d/%y")
+Boeing$Date = as.Date(Boeing$Date, "%m/%d/%y")
+CocaCola$Date = as.Date(CocaCola$Date, "%m/%d/%y")
+```
+### Confirm Date format has changed
+```{r, echo=TRUE}
+str(IBM)
+```
+# Question 1: How many rows of data are in each dataset?
+```{r, echo=TRUE}
+# Use nrow() to find number of rows in dataset
+nrow(IBM)
+nrow(GE)
+nrow(ProcterGamble)
+nrow(CocaCola)
+nrow(Boeing)
+```
+
+## Answer: 480
+
+
+# Question 2: What is the earliest/latest year in our datasets?
+```{r, echo=TRUE}
+# Use min/max funcions to find earliest and latest years
+min(CocaCola$Date, GE$Date, IBM$Date, Boeing$Date, ProcterGamble$Date)
+max(CocaCola$Date, GE$Date, IBM$Date, Boeing$Date, ProcterGamble$Date)
+```
+## Answer: Earliest = 1970, Latest = 2009
+
+
+# Question 3: For the period above what is the average stock of CocaCola?
+```{r, echo=TRUE}
+# Use mean() function to find mean average Coca-Cola price
+mean(CocaCola$StockPrice)
+```
+## Answer: 60.02973
+
+
+# Question 4: What is the max price of IBM during this period?
+```{r, echo=TRUE}
+# Use max() function to find maximum stock price
+max(IBM$StockPrice)
+```
+## Answer:438.9016
+
+
+# Question 5: What is the standard deviation of P&G stock price over this period?
+```{r, echo=TRUE}
+# Use sd() function to get P&G stock standard deviation
+sd(ProcterGamble$StockPrice)
+```
+## Answer: 18.19414
+
+
+# Question 6: What is the median price of Boeing in the last 5 years for which we have data?
+```{r, echo=TRUE}
+# Use 'which' function to find which row contains the value for the start date of the final 5 years.
+which(Boeing$Date == '2005-01-01')
+
+# Find median of the range of rows
+
+median(Boeing$StockPrice[421:480])
+```
+## Answer: 69.67567
+
+# BASIC PLOTTING QUESTIONS (PART 1)
+
+# Question 1: Identify the year during which Coca-Cola had the highest/lowest stock price?
+```{r, echo=TRUE}
+# Plot Coca Cola Stock Prices
+
+library('tidyverse')
+
+plot(CocaCola$Date,CocaCola$StockPrice, type="l", xlab = "Year", ylab= "Stock Price ($)", 
+     main = "Coca-Cola Stock Price (1970-2009)", xaxt= "n")
+
+axis.Date(1, at=seq(min(CocaCola$Date), max(CocaCola$Date), by="years"), format="%Y")
+
+
+# You can use which.max and min to verify exact values as well
+
+which.max(CocaCola$StockPrice)
+
+CocaCola$Date[37]
+
+which.min(CocaCola$StockPrice)
+
+CocaCola$Date[123]
+```
+## Answer: Highest price was in 1973, lowest was in 1980.
+
+# Question 2: What calendar year did it look to have the biggest (Year-over-Year) percentage increase?
+```{r, echo=TRUE}
+# Add year over year column (yoy) which displays a percentage increase for each month 
+# compared to 12 months prior
+
+CocaCola$yoy <- c(rep(NA,12),(CocaCola$StockPrice[13:nrow(CocaCola)]
+                              -CocaCola$StockPrice[1:(nrow(CocaCola)-12)])/
+                    CocaCola$StockPrice[1:(nrow(CocaCola)-12)]*100)
+
+# Create variable containing the list of values for every January (except for 1970) 
+# by indexing (increasing by 12)
+
+CCyoy<- CocaCola[c(13,25,37,49,61,73,85,97,109,121,133,145,157,169,181,193,205,
+                   217,229,241,253,265,277,289,301,313,325,337,349,361,373,385,397,
+                   409,421,433,445,457,469),3]
+
+# Find highest value using max() and the index using which.max(), the result is the 
+# 22nd January in the table which is 1992
+which.max(CCyoy)
+
+```
+## Answer: The greatest percent increase over a calendar year was from January 1991 to January 1992.
+
+# PART 2: Add P&G to plot, change lines to red and blue
+```{r, echo=TRUE}
+# Plot Coca-COla line, change colour to red, and replace title
+plot(CocaCola$Date,CocaCola$StockPrice, type="l", col="red", xaxt= "n", xlab= "Year", 
+     ylab= "Stock Price($)", main= "P&G vs Coca-Cola Stock Price (1970-2009)")
+
+# ADD legend
+legend("topright", legend=c("P&G","Coca-Cola"), col=c("blue","red"), lty=1:1, cex=1)
+
+#Add P&G line
+lines(ProcterGamble$Date, ProcterGamble$StockPrice, col="blue")
+
+axis.Date(1, at=seq(min(CocaCola$Date), max(CocaCola$Date), by="years"), format="%Y")
+```
+
+# Question 1: In March of 2000 the stock market plummeted as the tech bubble burst. Using the plot above, which company’s stock dropped more (relatively – i.e. percentage-wise)?
+
+## Answer: Using the plot, Procter and Gamble appear to have dropped more.
+
+# Question 2: In the year 1983 which company stock was going up? Which was going down?
+
+## Answer: P&G went down, Coca-Cola went up.
+
+# Question 3: Across the entire time period shown in your plot which stock had a generally lower price?
+
+## Answer: The plot reveals that Coca-Cola generally had the lower stock price over the time period.
+
+# DATA VISUALIZATION from 1995-2005:
+```{r, echo=TRUE}
+# Find start and end date of our data range
+
+which(CocaCola$Date == '1995-01-01')
+
+which(CocaCola$Date == '2005-12-01')
+
+# Start date is found in position 301, the end date is in position 432
+
+# Plot, adding lines for each company
+plot(CocaCola$Date[301:432], CocaCola$StockPrice[301:432], type="l", col="red", ylim=c(0,210),
+     xlab = "Year", ylab = "Stock Price ($)", main = "Stock Prices from 1995 - 2005", xaxt = "n")
+
+axis.Date(1, at=seq(min(CocaCola$Date), max(CocaCola$Date), by="years"), format="%Y")
+lines(ProcterGamble$Date, ProcterGamble$StockPrice, col="blue")
+lines(IBM$Date, IBM$StockPrice, col= "cadetblue3")
+lines(Boeing$Date,Boeing$StockPrice, col= "darkorange")
+lines(GE$Date, GE$StockPrice, col="chocolate4")
+legend("topright", legend=c("P&G","Coca-Cola", "IBM", "Boeing", "GE"), 
+       col=c("blue","red", "cadetblue3", "darkorange", "chocolate4"), lty=1:1, cex=0.8)
+```
+
+# Question 1: Which stock price fell the most right after the tech bubble of March 2000?
+
+```{r, echo=TRUE}
+# Find which row has March 2000
+which(CocaCola$Date == '2000-03-01')
+
+# View all the tables and go to row 363 and compare stock price to following months
+View(Boeing)
+View(CocaCola)
+View(GE)
+View(IBM)
+View(ProcterGamble)
+
+# OR we can subtract using April and March's stock prices. 
+# We know March 2000 is row 363 so April is 364
+
+ProcterGamble$StockPrice[364] - ProcterGamble$StockPrice[363]
+IBM$StockPrice[364] - IBM$StockPrice[363]
+CocaCola$StockPrice[364] - CocaCola$StockPrice[363]
+GE$StockPrice[364] - GE$StockPrice[363]
+Boeing$StockPrice[364] - Boeing$StockPrice[363]
+
+# The results reveal no companies had decreasing stock prices in April
+# We will go 1 month further to see which stocks crashed.
+
+ProcterGamble$StockPrice[365] - ProcterGamble$StockPrice[364]
+IBM$StockPrice[365] - IBM$StockPrice[364]
+CocaCola$StockPrice[365] - CocaCola$StockPrice[364]
+GE$StockPrice[365] - GE$StockPrice[364]
+Boeing$StockPrice[365] - Boeing$StockPrice[364]
+```
+
+## Answer: GE stock dropped the most after the bubble of March 2000. We can see in the plot there is a steep decline and the subtraction in the code confirms the greatest decrease in value belongs to GE. Procter Gamble and IBM also declined but nowhere near the amount of GE ($81.09005).
+
+# Question 2: What stock had the highest maximum price between 1995-2005?
+```{r, echo=TRUE}
+
+# Use max() function to find highest price between 1995-2005 (inclusive)
+max(CocaCola$StockPrice[301:432])
+max(IBM$StockPrice[301:432])
+max(GE$StockPrice[301:432])
+max(Boeing$StockPrice[301:432])
+max(ProcterGamble$StockPrice[301:432])
+```
+## Answer: IBM had the highest maximum price between 1995-2005.
+
+# Question 3: A few years before the tech bubble of 1997,there was anotherstock market crash trigged by economic crisis in Asia in October of 1997. If you compare stock prices from September 1997 to November 1997, which companies saw a decrease in price? Which company experienced the biggest decrease?
+```{r, echo=TRUE}
+# find which row September 1997 belongs to
+
+which(Boeing$Date == "1997-09-01")
+
+# find difference between September 1997 and November 1997 for each company. 
+
+Boeing$StockPrice[333] - Boeing$StockPrice[335]
+GE$StockPrice[333] - GE$StockPrice[335]
+CocaCola$StockPrice[333] - CocaCola$StockPrice[335]
+ProcterGamble$StockPrice[333] - ProcterGamble$StockPrice[335]
+IBM$StockPrice[333] - IBM$StockPrice[335]
+
+# Display results in a plot
+plot(IBM$Date[333:335], IBM$StockPrice[333:335], type = 'l', col= 'cadetblue3', xaxt= 'n', ylim= c(40,140), xlab = '1997', ylab = 'Stock Price ($)', main = 'Stock Prices Between September and November 1997' )
+legend("topright", legend=c("P&G","Coca-Cola", "IBM", "Boeing", "GE"), 
+       col=c("blue","red", "cadetblue3", "darkorange", "chocolate4"), lty=1:1, cex=0.8)
+lines(Boeing$Date,Boeing$StockPrice, col= "darkorange")
+lines(GE$Date, GE$StockPrice, col="chocolate4")
+lines(ProcterGamble$Date,ProcterGamble$StockPrice, col= "blue")
+lines(CocaCola$Date, CocaCola$StockPrice, col="red")
+axis.Date(1, at=seq(min(CocaCola$Date[333:335]), max(CocaCola$Date[333:335]), by="month"), format="%b")
+```
+
+## Answer: Boeing and Procter Gamble had decreases in this period, Procter Gamble had the largest decrease (40.65787).
+
+# Question 4: Which stock seemed to provide the best return (i.e.increase in price) between 2004-2005?
+```{r, echo=TRUE}
+# find the row for January 2004 and find difference between then and December 2005 
+# using subtraction for each company
+
+which(Boeing$Date == "2004-01-01")
+
+Boeing0405<- Boeing$StockPrice[432] - Boeing$StockPrice[409]
+Boeing0405
+GE0405<- GE$StockPrice[432] - GE$StockPrice[409]
+GE0405
+CC0405<- CocaCola$StockPrice[432] - CocaCola$StockPrice[409]
+CC0405
+PG0405<- ProcterGamble$StockPrice[432] - ProcterGamble$StockPrice[409]
+PG0405
+IBM0405<- IBM$StockPrice[432] - IBM$StockPrice[409]
+IBM0405
+
+# Create new list labeled "best-return"
+
+best_return<- c(Boeing0405, IBM0405, CC0405, PG0405, GE0405)
+
+# Plot 'best_return' to compare results
+
+barplot(best_return, ylim= c(-50, 40), col= c('darkorange', 'cadetblue3', 'red', 'blue', 'chocolate4'), main= 'Best Return Between 2004-2005', ylab = "Stock Value")
+legend("topright", legend=c("Boeing","IBM", "Coca-Cola", "P&G", "GE"), 
+       col=c("darkorange","cadetblue3", "red", "blue", "chocolate4"), lty=1:1, cex=0.7)
+```
+
+## Answer: Boeing had the best return between 2004-2005 (27.83583)
+
+# Question 5: Between 1995-2005, which company had the biggest delta between the maximum and minimum stock price?
+```{r, echo=TRUE}
+#  Use max/min functions to get values for max/min stock prices and subtract
+
+deltaCC<- max(CocaCola$StockPrice[301:432]) - min(CocaCola$StockPrice[301:432])
+deltaIBM<- max(IBM$StockPrice[301:432]) - min(IBM$StockPrice[301:432])
+deltaGE<- max(GE$StockPrice[301:432]) - min(GE$StockPrice[301:432])
+deltaBoeing<- max(Boeing$StockPrice[301:432]) - min(Boeing$StockPrice[301:432])
+deltaPG<- max(ProcterGamble$StockPrice[301:432]) - min(ProcterGamble$StockPrice[301:432])
+deltaCC
+deltaIBM
+deltaGE
+deltaBoeing
+deltaPG
+```
+
+## Answer: IBM had the greatest delta between max and min (146.7631)
+
+# Question 6: Which two companies’ stock price seem to be the most correlated (i.e. move up/down together)?
+```{r, echo=TRUE}
+# Use cor() function to find correlation between each company
+cor(IBM$StockPrice[301:432], GE$StockPrice[301:432])
+cor(IBM$StockPrice[301:432], ProcterGamble$StockPrice[301:432])
+cor(IBM$StockPrice[301:432], Boeing$StockPrice[301:432])
+cor(IBM$StockPrice[301:432], CocaCola$StockPrice[301:432])
+cor(GE$StockPrice[301:432], ProcterGamble$StockPrice[301:432])
+cor(GE$StockPrice[301:432], CocaCola$StockPrice[301:432])
+cor(GE$StockPrice[301:432], Boeing$StockPrice[301:432])
+cor(Boeing$StockPrice[301:432], CocaCola$StockPrice[301:432])
+cor(Boeing$StockPrice[301:432], ProcterGamble$StockPrice[301:432])
+cor(CocaCola$StockPrice[301:432], ProcterGamble$StockPrice[301:432])
+```
+
+## Answer: While it may be difficult to see just by looking at the plot found on page 7, the cor() function tells us that IBM and GE had the highest correlation in stock price with a correlation coefficient of 0.6651859
+
+# MONTHLY TREND ANALYSIS
+
+# Question 1: For IBM, compare the average stock price for each month to the its overall average stock price and identify all the months for which IBM historically had a higher stock price (we call this overindexing)? Which month over-indexed the most?
+```{r, echo=TRUE}
+# Find the mean stock price overall and the mean stock price per month for IBM
+IBMmean <-mean(IBM$StockPrice)
+IBMmean
+IBMtap <-tapply(IBM$StockPrice, months(IBM$Date), mean)
+IBMtap
+# Create plot to represent data above
+
+barplot(sort(IBMtap), las=2, main = 'IBM Average Stock Price (per Month)', ylab = 'Stock Price',
+        ylim = c(0,160))
+abline(h= IBMmean, col= 'red')
+legend('topleft', legend=c("Overall Mean Stock Price"), col=c('red'),lty = 1:1, cex=0.65)
+```
+
+## Answer: April, February, January, March and May all over-indexed. February over-indexed the most as it has the highest value of $152.6940. 
+
+# Question 2: Repeat the tapply() function you used to solve the last question for each of the 4 remaining companies. Do any of two or more companies have their highest stock price in the same months as each other? Which companies and months does this happen for?
+```{r, echo=TRUE}
+# Find the mean stock price overall and the mean stock price per month for each company
+# Create plots for these companies
+GEmean <- mean(GE$StockPrice)
+GEmean
+GEtap <- tapply(GE$StockPrice, months(GE$Date), mean)
+GEtap
+
+barplot(sort(GEtap), las=2, main = 'GE Average Stock Price (per Month)', ylab = 'Stock Price',
+        ylim = c(0,100))
+abline(h= GEmean, col= 'red')
+legend('topleft', legend=c("Overall Mean Stock Price"), col=c('red'),lty = 1:1, cex=0.75)
+```
+```{r, echo=TRUE}
+CCmean<- mean(CocaCola$StockPrice)
+CCmean
+CCtap <- tapply(CocaCola$StockPrice, months(CocaCola$Date), mean)
+CCtap
+
+barplot(sort(CCtap), las=2, main = 'Coca-Cola Average Stock Price (per Month)', ylab = 'Stock Price',
+        ylim = c(0,70))
+abline(h= CCmean, col= 'red')
+legend('topleft', legend=c("Overall Mean Stock Price"), col=c('red'),lty = 1:1, cex=0.65)
+```
+```{r, echo=TRUE}
+Boeingmean<- mean(Boeing$StockPrice)
+Boeingmean
+Boeingtap<- tapply(Boeing$StockPrice, months(Boeing$Date), mean)
+Boeingtap
+
+barplot(sort(Boeingtap), las=2, main = 'Boeing Average Stock Price (per Month)', ylab = 'Stock Price',
+        ylim = c(0,70))
+abline(h= Boeingmean, col= 'red')
+legend('topleft', legend=c("Overall Mean Stock Price"), col=c('red'),lty = 1:1, cex=0.65)
+```
+```{r, echo=TRUE}
+PGmean<- mean(ProcterGamble$StockPrice)
+PGmean
+PGtap<- tapply(ProcterGamble$StockPrice, months(ProcterGamble$Date), mean)
+PGtap
+
+barplot(sort(PGtap), las=2, main = 'Procter Gamble Average Stock Price (per Month)', ylab = 'Stock Price',
+        ylim = c(0,90))
+abline(h= PGmean, col= 'red')
+legend('topleft', legend=c("Overall Mean Stock Price"), col=c('red'),lty = 1:1, cex=0.65)
+```
+
+## Answer: 
+### - GE over-indexed in April, February, January, March and May, April was the highest.
+### - Coca-Cola over-indexed in April, February, January, June, March and May, April was the highest.
+### - Boeing over-indexed in April, August, February, June, March, and May with May being the highest.
+### - P&G over-indexed in December, February, January, May, and November with January being the highest.
+
+## GE and Coca-Cola both have April as their highest average month.
+
+
+# Question 3: What trend do you see for the months of December vs January for each company? Is there an over-arching trend that applies to all companies when comparing all historical December vs January stock prices?
+```{r, echo=TRUE}
+
+# Create variables for each company containing the list of January and December Dates and prices
+# Display variables after creating them
+
+IBMJan<- seq(IBM$Date[1], IBM$Date[480], by= "year")
+IBMJanStock<- IBM$StockPrice[seq(1,nrow(IBM),12)]
+IBMJan
+IBMJanStock
+
+IBMDec<- seq(IBM$Date[12], IBM$Date[480], by= "year")
+IBMDecStock<- IBM$StockPrice[seq(12,nrow(IBM),12)]
+IBMDec
+IBMDecStock
+
+GEJan<- seq(GE$Date[1], GE$Date[480], by= "year")
+GEJanStock<- GE$StockPrice[seq(1,nrow(GE),12)]
+GEJan
+GEJanStock
+
+GEDec<- seq(GE$Date[12], GE$Date[480], by= "year")
+GEDecStock<- GE$StockPrice[seq(12,nrow(GE),12)]
+GEDec
+GEDecStock
+
+CCJan<- seq(CocaCola$Date[1], CocaCola$Date[480], by= "year")
+CCJanStock<- CocaCola$StockPrice[seq(1,nrow(CocaCola),12)]
+CCJan
+CCJanStock
+
+CCDec<- seq(CocaCola$Date[12], CocaCola$Date[480], by= "year")
+CCDecStock<- CocaCola$StockPrice[seq(12,nrow(CocaCola),12)]
+CCDec
+CCDecStock
+
+BoeingJan<- seq(Boeing$Date[1], Boeing$Date[480], by= "year")
+BoeingJanStock<- Boeing$StockPrice[seq(1,nrow(Boeing),12)]
+BoeingJan
+BoeingJanStock
+
+BoeingDec<- seq(Boeing$Date[12], Boeing$Date[480], by= "year")
+BoeingDecStock<- Boeing$StockPrice[seq(12,nrow(Boeing),12)]
+BoeingDec
+BoeingDecStock
+
+PGJan<- seq(ProcterGamble$Date[1], ProcterGamble$Date[480], by= "year")
+PGJanStock<- ProcterGamble$StockPrice[seq(1,nrow(ProcterGamble),12)]
+PGJan
+PGJanStock
+
+PGDec<- seq(ProcterGamble$Date[12], ProcterGamble$Date[480], by= "year")
+PGDecStock<- ProcterGamble$StockPrice[seq(12,nrow(ProcterGamble),12)]
+PGDec
+PGDecStock
+
+# Plot each company's January and December stock prices in line graphs
+
+plot(IBMDec,IBMDecStock, type = 'l', xaxt= 'n', xlab = 'Year', ylab = 'Stock Price ($)',
+     main = 'IBM Stock Price (1970-2009)')
+lines(IBMJan,IBMJanStock, col='red')
+axis.Date(1, at=seq(min(IBMDec), max(IBMDec), by="years"), format="%Y")
+legend("topright", legend=c("January","December"), col=c("red","black"), lty=1:1, cex=1)
+
+plot(GEDec,GEDecStock, type = 'l', xaxt= 'n', xlab = 'Year', ylab = 'Stock Price ($)',
+     main = 'GE Stock Price (1970-2009)')
+lines(GEJan,GEJanStock, col='red')
+axis.Date(1, at=seq(min(GEDec), max(GEDec), by="years"), format="%Y")
+legend("topleft", legend=c("January","December"), col=c("red","black"), lty=1:1, cex=1)
+
+plot(CCDec,CCDecStock, type = 'l', xaxt= 'n', xlab = 'Year', ylab = 'Stock Price ($)',
+     main = 'Coca-Cola Stock Price (1970-2009)')
+lines(CCJan,CCJanStock, col='red')
+axis.Date(1, at=seq(min(CCDec), max(CCDec), by="years"), format="%Y")
+legend("topright", legend=c("January","December"), col=c("red","black"), lty=1:1, cex=1)
+
+plot(BoeingDec,BoeingDecStock, type = 'l', xaxt= 'n', xlab = 'Year', ylab = 'Stock Price ($)',
+     main = 'Boeing Stock Price (1970-2009)')
+lines(BoeingJan,BoeingJanStock, col='red')
+axis.Date(1, at=seq(min(BoeingDec), max(BoeingDec), by="years"), format="%Y")
+legend("topleft", legend=c("January","December"), col=c("red","black"), lty=1:1, cex=1)
+
+plot(PGDec,PGDecStock, type = 'l', xaxt= 'n', xlab = 'Year', ylab = 'Stock Price ($)',
+     main = 'Procter Gamble Stock Price (1970-2009)')
+lines(PGJan,PGJanStock, col='red')
+axis.Date(1, at=seq(min(PGDec), max(PGDec), by="years"), format="%Y")
+legend("topright", legend=c("January","December"), col=c("red","black"), lty=1:1, cex=0.8)
+```
+
+## Answer: All companies have higher mean stock prices for January than December. Based on the plots above we see that January stock prices for all companies tend to be higher than December between 1970-2009.
+
